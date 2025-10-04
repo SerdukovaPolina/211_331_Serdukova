@@ -7,7 +7,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    QByteArray key, iv;
+    /*QByteArray key, iv;
     deriveKeyAndIVForFile(defaultPin, key, iv);
     QByteArray decryptedData = decryptFile(key, iv, defaultFilePath);
 
@@ -22,7 +22,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     fillTable(records);
 
-    ui->stackedWidget->setCurrentWidget(ui->Data_page);
+    ui->stackedWidget->setCurrentWidget(ui->Data_page);*/
+
+    ui->wrong_pin->setVisible(false);
+    ui->stackedWidget->setCurrentWidget(ui->Pin_page);
 
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
@@ -192,6 +195,27 @@ void MainWindow::on_pushButton_clicked()
         fillTable(records);
 
         ui->stackedWidget->setCurrentWidget(ui->Data_page);
+    }
+
+}
+
+
+void MainWindow::on_check_pin_clicked()
+{
+
+    QByteArray pin = ui->pin->text().toUtf8();
+
+    QByteArray hash = QCryptographicHash::hash(pin, QCryptographicHash::Sha512);
+
+    qDebug() << hash.toHex();
+
+    if (hash == QByteArray::fromHex(expectedHash.toUtf8())) {
+        qDebug() << "Correct pin";
+        ui->wrong_pin->setVisible(false);
+        ui->stackedWidget->setCurrentWidget(ui->Data_page);
+    } else {
+        qDebug() << "Incorrect pin";
+        ui->wrong_pin->setVisible(true);
     }
 
 }
