@@ -7,25 +7,11 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    /*QByteArray key, iv;
-    deriveKeyAndIVForFile(defaultPin, key, iv);
-    QByteArray decryptedData = decryptFile(key, iv, defaultFilePath);
-
-    QVector<Record> records = parseDecryptedData(decryptedData);
-
-    QFile file(defaultFilePath);
-    QFileInfo fileInfo(file);
-    ui->file_path->setText(fileInfo.absoluteFilePath());
-
-    key.fill(0);
-    iv.fill(0);
-
-    fillTable(records);
-
-    ui->stackedWidget->setCurrentWidget(ui->Data_page);*/
-
     ui->wrong_pin->setVisible(false);
+
+    this->setWindowTitle("Вход");
     ui->stackedWidget->setCurrentWidget(ui->Pin_page);
+
 
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
@@ -179,13 +165,33 @@ void MainWindow::on_pushButton_clicked()
     } else {
         currentFile = filename;
         ui->filename_entered->clear();
+
+        this->setWindowTitle("Вход");
+        ui->stackedWidget->setCurrentWidget(ui->Pin_page);
+    }
+
+}
+//Проверка пин-кода при входе и при открытии файла. есть 3 попытки неправильно ввести пин
+void MainWindow::on_check_pin_clicked()
+{
+
+
+    QByteArray pin = ui->pin->text().toUtf8();
+
+    QByteArray hash = QCryptographicHash::hash(pin, QCryptographicHash::Sha512);
+
+    ui->pin->clear();
+
+    if (hash == QByteArray::fromHex(expectedHash.toUtf8())) {
+        qDebug() << "Correct pin";
+        ui->wrong_pin->setVisible(false);
         QByteArray key, iv;
         deriveKeyAndIVForFile(defaultPin, key, iv);
-        QByteArray decryptedData = decryptFile(key, iv, filename);
+        QByteArray decryptedData = decryptFile(key, iv, currentFile);
 
         QVector<Record> records = parseDecryptedData(decryptedData);
         qDebug() << records.size();
-        QFile file(filename);
+        QFile file(currentFile);
         QFileInfo fileInfo(file);
         ui->file_path->setText(fileInfo.absoluteFilePath());
 
@@ -194,28 +200,19 @@ void MainWindow::on_pushButton_clicked()
 
         fillTable(records);
 
+        this->setWindowTitle("Данные");
         ui->stackedWidget->setCurrentWidget(ui->Data_page);
-    }
-
-}
+        attempts = 0;
 
 
-void MainWindow::on_check_pin_clicked()
-{
-
-    QByteArray pin = ui->pin->text().toUtf8();
-
-    QByteArray hash = QCryptographicHash::hash(pin, QCryptographicHash::Sha512);
-
-    qDebug() << hash.toHex();
-
-    if (hash == QByteArray::fromHex(expectedHash.toUtf8())) {
-        qDebug() << "Correct pin";
-        ui->wrong_pin->setVisible(false);
-        ui->stackedWidget->setCurrentWidget(ui->Data_page);
     } else {
         qDebug() << "Incorrect pin";
         ui->wrong_pin->setVisible(true);
+        attempts += 1;
+        if (attempts == 3) {
+            QCoreApplication::quit();
+        }
+
     }
 
 }

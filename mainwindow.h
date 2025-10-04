@@ -44,8 +44,8 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    QString defaultFilePath = "../../data.enc";
-    QString currentFile = defaultFilePath;
+    int attempts = 0;
+    QString currentFile = "../../data.enc";
     QString defaultPin = "211331";
     QString expectedHash = "14be53342d08c60b4d1dbe86caae8c5590735aa1602b3a095b12d2f8c9667601f0a127495dcce506e10c316e8d0a91d82ccce077891991e2740cb36a004a2081";
 

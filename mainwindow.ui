@@ -36,7 +36,7 @@
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="Open_page">
        <layout class="QGridLayout" name="gridLayout">
@@ -79,7 +79,11 @@
            </spacer>
           </item>
           <item>
-           <widget class="QLineEdit" name="filename_entered"/>
+           <widget class="QLineEdit" name="filename_entered">
+            <property name="placeholderText">
+             <string>Укажите путь</string>
+            </property>
+           </widget>
           </item>
           <item>
            <widget class="QPushButton" name="pushButton">
@@ -146,7 +150,17 @@
            </spacer>
           </item>
           <item>
-           <widget class="QLineEdit" name="pin"/>
+           <widget class="QLineEdit" name="pin">
+            <property name="text">
+             <string/>
+            </property>
+            <property name="echoMode">
+             <enum>QLineEdit::EchoMode::Password</enum>
+            </property>
+            <property name="placeholderText">
+             <string>Введите пин-код</string>
+            </property>
+           </widget>
           </item>
           <item>
            <widget class="QPushButton" name="check_pin">
