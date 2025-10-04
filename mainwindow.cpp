@@ -17,9 +17,13 @@ MainWindow::MainWindow(QWidget *parent)
     QFileInfo fileInfo(file);
     ui->file_path->setText(fileInfo.absoluteFilePath());
 
+    key.fill(0);
+    iv.fill(0);
+
     fillTable(records);
 
     ui->stackedWidget->setCurrentWidget(ui->Data_page);
+
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
 }
@@ -87,7 +91,22 @@ QByteArray MainWindow::decryptFile(const QByteArray &key, const QByteArray &iv, 
 
 void MainWindow::fillTable(const QVector<Record>& records)
 {
+    ui->tableWidget->clear();
     ui->tableWidget->setRowCount(0);
+    ui->tableWidget->setColumnCount(4); // обязательно перед установкой заголовков
+
+    // Устанавливаем заголовки столбцов
+    ui->tableWidget->setHorizontalHeaderLabels(QStringList()
+                                               << "Хэш-код"
+                                               << "Номер счёта списания"
+                                               << "Номер счёта поступления"
+                                               << "Дата и время (ISO 8601)");
+
+    if (records.size() == 0) {
+        ui->no_data->setVisible(true);
+    } else {
+        ui->no_data->setVisible(false);
+    }
 
     for (int i = 0; i < records.size(); ++i) {
         ui->tableWidget->insertRow(i);
@@ -169,3 +188,42 @@ QVector<Record> MainWindow::parseDecryptedData(const QByteArray& data)
 
     return records;
 }
+
+//Переход на форму ввода пути файла для открытия
+void MainWindow::on_openFile_clicked()
+{
+    ui->stackedWidget->setCurrentWidget(ui->Open_page);
+}
+
+//Открытие нового файла + парсинг
+void MainWindow::on_pushButton_clicked()
+{
+    QString filename = ui->filename_entered->text();
+    QFile file(filename);
+
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        ui->open_failed->setStyleSheet("color: red;");
+        ui->open_failed->setText("Не уделось открыть указанный файл!");
+        ui->filename_entered->clear();
+    } else {
+        ui->filename_entered->clear();
+        QByteArray key, iv;
+        deriveKeyAndIVForFile(defaultPin, key, iv);
+        QByteArray decryptedData = decryptFile(key, iv, filename);
+
+        QVector<Record> records = parseDecryptedData(decryptedData);
+        qDebug() << records.size();
+        QFile file(filename);
+        QFileInfo fileInfo(file);
+        ui->file_path->setText(fileInfo.absoluteFilePath());
+
+        key.fill(0);
+        iv.fill(0);
+
+        fillTable(records);
+
+        ui->stackedWidget->setCurrentWidget(ui->Data_page);
+    }
+
+}
+
