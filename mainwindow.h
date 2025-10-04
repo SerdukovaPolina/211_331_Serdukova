@@ -43,24 +43,14 @@ private slots:
 private:
     Ui::MainWindow *ui;
     QString defaultFilePath = "../../data.enc";
+    QString currentFile = defaultFilePath;
     QString defaultPin = "211331";
 
     void deriveKeyAndIVForFile(const QString &pin, QByteArray &key, QByteArray &iv);
     QByteArray decryptFile(const QByteArray &key, const QByteArray &iv, const QString& filename);
 
     void fillTable(const QVector<Record>& records);
-    QVector<Record> parseFile(const QString& filename);
     QVector<Record> parseDecryptedData(const QByteArray& data);
-
-    //void setUpTable(const QString& filename);
-
-
-
-
-
-
-
-
 
 };
 #endif // MAINWINDOW_H

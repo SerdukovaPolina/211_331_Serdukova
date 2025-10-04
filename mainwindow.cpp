@@ -33,7 +33,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-
+//Извленчение ключа и вектора для AES-256-cbc расшифрования
 void MainWindow::deriveKeyAndIVForFile(const QString &pin, QByteArray &key, QByteArray &iv) {
     QString s = "serdukova";
     QByteArray salt = s.toUtf8();
@@ -48,7 +48,7 @@ void MainWindow::deriveKeyAndIVForFile(const QString &pin, QByteArray &key, QByt
 }
 
 
-
+//Расшифрование файла AES-256-cbc
 QByteArray MainWindow::decryptFile(const QByteArray &key, const QByteArray &iv, const QString& filename)
 {
     QFile inputFile(filename);
@@ -88,9 +88,11 @@ QByteArray MainWindow::decryptFile(const QByteArray &key, const QByteArray &iv, 
 }
 
 
-
+//Заполнение таблицы на сонвое переданного массива записей
 void MainWindow::fillTable(const QVector<Record>& records)
 {
+    this->setWindowTitle("Данные");
+
     ui->tableWidget->clear();
     ui->tableWidget->setRowCount(0);
     ui->tableWidget->setColumnCount(4); // обязательно перед установкой заголовков
@@ -120,42 +122,7 @@ void MainWindow::fillTable(const QVector<Record>& records)
     ui->tableWidget->resizeColumnsToContents();
 }
 
-
-QVector<Record> MainWindow::parseFile(const QString& filename)
-{
-    QVector<Record> records;
-    QFile file(filename);
-
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qDebug() << "Не удалось открыть файл:" << filename;
-        return records;
-    }
-
-    QTextStream in(&file);
-    QStringList buffer;
-
-    while (!in.atEnd()) {
-        QString line = in.readLine().trimmed();
-        if (line.isEmpty())
-            continue;
-
-        buffer.append(line);
-
-        if (buffer.size() == 4) {
-            Record rec;
-            rec.hash = buffer[0];
-            rec.cardNumberSource = buffer[1];
-            rec.cardNumberDestination = buffer[2];
-            rec.timestamp = buffer[3];
-            records.append(rec);
-            buffer.clear();
-        }
-    }
-
-    return records;
-}
-
-
+//Парсинг QByteArray расшифрованных данных
 QVector<Record> MainWindow::parseDecryptedData(const QByteArray& data)
 {
     QVector<Record> records;
@@ -193,6 +160,7 @@ QVector<Record> MainWindow::parseDecryptedData(const QByteArray& data)
 void MainWindow::on_openFile_clicked()
 {
     ui->stackedWidget->setCurrentWidget(ui->Open_page);
+    this->setWindowTitle("Открыть файл");
 }
 
 //Открытие нового файла + парсинг
@@ -206,6 +174,7 @@ void MainWindow::on_pushButton_clicked()
         ui->open_failed->setText("Не уделось открыть указанный файл!");
         ui->filename_entered->clear();
     } else {
+        currentFile = filename;
         ui->filename_entered->clear();
         QByteArray key, iv;
         deriveKeyAndIVForFile(defaultPin, key, iv);
